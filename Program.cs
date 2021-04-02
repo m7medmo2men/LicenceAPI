@@ -18,7 +18,7 @@ using System.Security.Cryptography;
 
 class Program
 {
-        
+ 
     public static string Encryptt(string encryptString)
     {
         string EncryptionKey = "RE358P71305KMCHA8721DFA684ZXCZNCXD0QMVJD4220L";
@@ -96,8 +96,8 @@ class Program
                 throw response.ErrorException;
             }
             var finalResponse = JObject.Parse(response.Content);
-            return finalResponse["status"].ToString();
-                
+            return finalResponse["message"].ToString();
+
         }
         catch (Exception e)
         {
@@ -107,68 +107,93 @@ class Program
 
     }
 
-    public static string getLicence() {
-        var client = new RestClient("http://localhost:3000");
-        var request = new RestRequest("licences/1", Method.GET);
-        request.AddHeader("Accept", "application/json");
-        IRestResponse response = client.Execute(request);
-        if (response.ResponseStatus == ResponseStatus.Error) {
-            throw response.ErrorException;
-        }
-            
-        //return response.Content;
-        var finalResponse = JObject.Parse(response.Content);
-        return finalResponse["data"].ToString();
+    public static void UpdateLicence(string xml)
+    {
+        /**
+         * Take a string that represents the xml file
+         * Encrypt it and save it
+         * 
+         * Replace The Old encrypted xml file
+         * */
+        string encryptedNewXml = Encryptt(xml);
+        File.WriteAllText("D:\\work\\licence.xml", encryptedNewXml);
     }
 
-    public static void updateLicenceFile() {
+    public static void GetDataFromServer() {
             
-        var data = getLicence(); // Get Latest Data From Server
+        var data = CheckLicence(); // Get Latest Data From Server
 
-        XNode node = JsonConvert.DeserializeXNode(data, "Root");
-        string EncryptXml = Encryptt(node.ToString());
-        File.WriteAllText("licence.xml", EncryptXml);
+        if (data == "fail") {
+            Console.WriteLine("Not Authorized ..");
+        } else { 
+            XNode node = JsonConvert.DeserializeXNode(data, "Root");
+            UpdateLicence(node.ToString());
+        }
+    }
 
+    public static void ValidateDate(ref XmlDocument xdoc) // This like end of day proc.
+    {
+        string Date = xdoc.GetElementsByTagName("Date")[0].InnerText;
+        DateTime lastDate = Convert.ToDateTime(Date);
+        DateTime ClientDate = DateTime.UtcNow.Date;
+        int res = DateTime.Compare(lastDate, ClientDate);
+        if (res > 0)
+        {
+            // systemDateNow < lastDate
+            Console.WriteLine("Date Was Changed ");
+            
+            xdoc.GetElementsByTagName("Active")[0].InnerText = "N";
+            xdoc.GetElementsByTagName("Date")[0].InnerText = lastDate.AddDays(1.0).ToShortDateString();
+            UpdateLicence(xdoc.InnerXml);
+        }
+        else
+        {
+            xdoc.GetElementsByTagName("Date")[0].InnerText = lastDate.AddDays(1.0).ToShortDateString();
+            UpdateLicence(xdoc.InnerXml);
+        }
     }
     
-    public static string readLicenceXml()
+    public static string readLicence()
     {
-        XmlDocument xdoc = new XmlDocument();
-        xdoc.Load("D:\\Work\\dotnet test\\licence.xml");
-        string encryptedXml = Encryptt(xdoc.InnerXml);
+        string encryptedXml = File.ReadAllText("D:\\work\\licence.xml");
         return encryptedXml;
     }
 
-    public static bool validate(XmlDocument xdoc)
-    {
-        string Active = xdoc.GetElementsByTagName("Active")[0].InnerText;
-        string mac = xdoc.GetElementsByTagName("mac")[0].InnerText;
-        string LicenceType = xdoc.GetElementsByTagName("LicenceType")[0].InnerText;
-        string EndDate = xdoc.GetElementsByTagName("EndDate")[0].InnerText;
-        string EndTimestamp = xdoc.GetElementsByTagName("EndTimestamp")[0].InnerText;
-        Console.WriteLine(Active + " " + mac + " " + LicenceType + " " + EndDate + " " + EndTimestamp);
-        return true;
-    }
-
+    
     static void Main(string[] args)
     {
 
-        if (!File.Exists("licence.xml")) {
-            updateLicenceFile();
+        if (!File.Exists("D:\\work\\licence.xml")) {
+            GetDataFromServer();
         }
         
-        string encryptedXml = readLicenceXml();
-        string decryptedXml = Decryptt(encryptedXml);
-
-        XmlDocument xdoc = new XmlDocument();
-        xdoc.LoadXml(decryptedXml);
-
-        string licenceStatus = xdoc.GetElementsByTagName("Active")[0].InnerText;
-        if (licenceStatus == "Y")
+        try
         {
-            Console.WriteLine("Authorized ...")
-            Console.WriteLine("Processing Stores ....");
+            string encryptedXml = readLicence();
+            string decryptedXml = Decryptt(encryptedXml);
+            XmlDocument xdoc = new XmlDocument();
+            xdoc.LoadXml(decryptedXml);
+            ValidateDate(ref xdoc);
+            string licenceStatus = xdoc.GetElementsByTagName("Active")[0].InnerText;
+            if (licenceStatus == "Y")
+            {
+                Console.WriteLine("Authorized ...");
+                Console.WriteLine("Processing Stores ....");
+            }
+            else
+            {
+                Console.WriteLine("Your Licence Runs in Issue ...");
+                Console.WriteLine("Please Contact StarCom ....");
+                GetDataFromServer();
+            }
+        } 
+        catch (Exception e)
+        {
+            Console.WriteLine("Licence Was Manipulated ...");
+            /* Terminate The Service */
         }
+
+        
 
     }
 }
