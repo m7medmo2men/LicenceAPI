@@ -104,6 +104,7 @@ exports.checkLicence = (req, res, next) => {
     } else {
         res.status(200).json({
             status: "success",
+            message: licence,
         })
     }
 }
