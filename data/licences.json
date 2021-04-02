@@ -8,17 +8,19 @@
         "LicenceType": "trial",
         "StartDate": "04/01/2021",
         "EndDate": "04/01/2022",
+        "Date": "04/1/2021",
         "EndTimestamp": 1648810800
     },
     {
         "id":2,
-        "Active": "N",
-        "mac":"TREWCVAB",
+        "Active": "Y",
+        "mac":"F80DAC10413D",
         "NumberOfStores":25,
         "NumberofAccounts":7,
         "LicenceType": "trial",
         "StartDate": "04/01/2021",
         "EndDate": "04/30/2021",
+        "Date": "04/7/2021",
         "EndTimestamp": 1651316400
     },
     {
