@@ -1,18 +1,22 @@
 [
     {
         "id":1,
+        "Active": "Y",
         "mac":"68F7284F2E72",
-        "NumberOfStores":77,
-        "NumberOfAccounts":5,
+        "NumberOfStores": 77,
+        "NumberOfAccounts": 5,
+        "LicenceType": "trial",
         "StartDate": "04/01/2021",
         "EndDate": "04/01/2022",
         "EndTimestamp": 1648810800
     },
     {
         "id":2,
+        "Active": "N",
         "mac":"TREWCVAB",
         "NumberOfStores":25,
         "NumberofAccounts":7,
+        "LicenceType": "trial",
         "StartDate": "04/01/2021",
         "EndDate": "04/30/2021",
         "EndTimestamp": 1651316400
