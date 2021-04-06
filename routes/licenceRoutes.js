@@ -3,6 +3,8 @@ const express = require("express");
 const licenceController = require("./../controllers/licenceController")
 const router = express.Router();
 
+
+
 router
     .route('/checkLicence')
     .post(licenceController.checkLicence);
