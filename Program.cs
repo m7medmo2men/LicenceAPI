@@ -18,7 +18,8 @@ using System.Security.Cryptography;
 
 class Program
 {
-    
+    // public static XmlDocument xdoc;
+    public static string MALL_NAME;
     public static string Encryptt(string encryptString)
     {
         string EncryptionKey = "RE358P71305KMCHA8721DFA684ZXCZNCXD0QMVJD4220L";
@@ -99,8 +100,9 @@ class Program
             // return finalResponse["message"].ToString();
             if (finalResponse["status"].ToString() == "success")
             {
+                MALL_NAME = finalResponse["message"]["MallName"].ToString();
                 return finalResponse["message"].ToString();
-            } 
+            }
             else
             {
                 return finalResponse["status"].ToString();
@@ -120,16 +122,31 @@ class Program
 
         if (data == "fail") {
             Console.WriteLine("Not Authorized ..");
-        } else { 
+        } else {
             XNode node = JsonConvert.DeserializeXNode(data, "Root");
             UpdateLicence(node.ToString());
         }
     }
 
+    // Boolean or Void ???
+    public static bool ValidateMac(ref XmlDocument xdoc)
+    {
+        if (xdoc.GetElementsByTagName("mac")[0].InnerText == GetMacAddress())
+            return true;
+        else
+        {
+            string mallName = xdoc.GetElementsByTagName("MallName")[0].InnerText;
+            xdoc.GetElementsByTagName("Active")[0].InnerText = "N";
+            NotifyServer($"${mallName} runs the application on different device");
+            return false;
+        }
+    }
+
     public static void ValidateDate(ref XmlDocument xdoc) // This like end of day proc.
     {
+        string mallName = xdoc.GetElementsByTagName("MallName")[0].InnerText;
         string Date = xdoc.GetElementsByTagName("Date")[0].InnerText;
-        Date = "4/27/2021";
+        // Date = "4/27/2021";
         string ExpiryDateStr = xdoc.GetElementsByTagName("EndDate")[0].InnerText;
 
         DateTime lastDate = Convert.ToDateTime(Date);
@@ -140,9 +157,11 @@ class Program
         // Move To Server
         if (lastDate.AddDays(5.0) > ExpiryDate)
         {
-            string message = $"This Mall Licence will end in {ExpiryDate}";
+            string message = $"This {mallName} Licence will end in {ExpiryDate}";
             NotifyServer(message);
         }
+
+
         int res = DateTime.Compare(lastDate, ClientDate);
         if (res > 0)
         {
@@ -216,8 +235,7 @@ class Program
             var client = new RestClient("http://localhost:3000");
             var request = new RestRequest("licences/notifyExpirationDate", Method.POST);
             request.AddHeader("Accept", "application/json");
-            request.AddJsonBody(new { mac = macAddress , message = msg});
-            // request.AddJsonBody(new { message = msg });
+            request.AddJsonBody(new { mac = macAddress , message = msg, mallName = MALL_NAME});
             IRestResponse response = client.Execute(request);
             if (response.ResponseStatus == ResponseStatus.Error)
             {
@@ -232,7 +250,7 @@ class Program
             Console.WriteLine(e.Message);
         }
     }
-
+    
     static void Main(string[] args)
     {
         if (!File.Exists("D:\\Work\\licence")) {
@@ -246,8 +264,10 @@ class Program
             string decryptedXml = Decryptt(encryptedXml);
             XmlDocument xdoc = new XmlDocument();
             xdoc.LoadXml(decryptedXml);
+            NotifyServer("Test message");
             ValidateDate(ref xdoc);
             string licenceStatus = xdoc.GetElementsByTagName("Active")[0].InnerText;
+            string mallName = xdoc.GetElementsByTagName("MallName")[0].InnerText;
             if (licenceStatus == "Y")
             {
                 Console.WriteLine("Authorized ...");
@@ -265,7 +285,8 @@ class Program
         catch (Exception e)
         {
             Console.WriteLine("Licence Was Manipulated ...");
-            NotifyServer("Licence Was Manipulated");
+            NotifyServer($"Some Mall Tried to manipulate the licence");
+            // File.Delete("D:\\Work\\licence");
             /* delete file */
             /* Terminate The Service */
         }

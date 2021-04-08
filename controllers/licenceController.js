@@ -137,11 +137,7 @@ exports.notifyExpirationDate = (req, res, next) => {
     const nextID = notifications.length + 1;
     let date = new Date();
     date = date.toLocaleDateString();
-    const newNotification = Object.assign({
-        id: nextID,
-        date: date,
-        message: req.body.message
-    });
+    const newNotification = Object.assign({id: nextID}, {date: date}, req.body);
     notifications.push(newNotification);
     fs.writeFileSync(`${__dirname}/../data/notifications.json`, JSON.stringify(notifications));
     return res.status(200).json({
