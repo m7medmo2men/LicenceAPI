@@ -123,8 +123,8 @@ class Program
         if (data == "fail") {
             Console.WriteLine("Not Authorized ..");
         } else {
-            XNode node = JsonConvert.DeserializeXNode(data, "Root");
-            UpdateLicence(node.ToString());
+            XNode node = JsonConvert.DeserializeXNode(data, "Root"); // Convert from json to xml
+            UpdateLicence(node.ToString()); // pass the xml file in string format to be encrypted
         }
     }
 
