@@ -5,6 +5,10 @@ let licences = JSON.parse(
     fs.readFileSync(`${__dirname}/../data/licences.json`)
 );
 
+let notifications = JSON.parse(
+    fs.readFileSync(`${__dirname}/../data/notifications.json`)
+)
+
 /// [Done]
 exports.getAllLicence = (req, res, next) => {
     //res.header("Access-Control-Allow-Origin", "*");
@@ -124,4 +128,23 @@ exports.disableLicence = (req, res, next) => {
             }
         }
     }
+}
+
+exports.notifyExpirationDate = (req, res, next) => {
+    console.log(req.body);
+    const nextID = notifications.length + 1;
+    let date = new Date();
+    date = date.toLocaleDateString();
+    const newNotification = Object.assign({
+        id: nextID,
+        date: date,
+        message: req.body.message
+    });
+    notifications.push(newNotification);
+    fs.writeFileSync(`${__dirname}/../data/notifications.json`, JSON.stringify(notifications));
+    return res.status(200).json({
+        status: "success",
+        message: "notification added successfully",
+        data: newNotification
+    })
 }

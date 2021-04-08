@@ -5,6 +5,10 @@ const router = express.Router();
 
 
 router
+    .route('/notifyExpirationDate')
+    .post(licenceController.notifyExpirationDate)
+
+router
     .route('/disableLicence')
     .post(licenceController.disableLicence);
 
