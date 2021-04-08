@@ -1,6 +1,7 @@
 [
     {
         "id":1,
+        "MallName": "Majjarh",
         "Active": "Y",
         "mac":"68F7284F2E72",
         "NumberOfStores": 77,
@@ -13,6 +14,7 @@
     },
     {
         "id":2,
+        "MallName": "DownTown",
         "Active": "Y",
         "mac":"F80DAC10413D",
         "NumberOfStores":25,
@@ -22,14 +24,5 @@
         "EndDate": "04/30/2021",
         "Date": "04/7/2021",
         "EndTimestamp": 1651316400
-    },
-    {
-        "id":3,
-        "mac":"XYZWBC",
-        "NumberOfStores":16,
-        "NumberOfAccounts":16,
-        "StartDate": "04/01/2021",
-        "EndDate": "07/01/2021",
-        "EndTimestamp": 1625137200
     }
 ]
