@@ -90,7 +90,7 @@ exports.deleteLicence = (req, res, next) => {
     }
 
     fs.writeFileSync(`${__dirname}/../data/licences.json`, JSON.stringify(licences));
- 
+    
     return res.status(200).json({
         status: "success licence deleted successfully",
         message: "Licence Deleted Successfully"
@@ -99,7 +99,9 @@ exports.deleteLicence = (req, res, next) => {
 
 exports.checkLicence = (req, res, next) => {
     console.log(req.body.mac)
-    const licence = licences.find(el => el.mac === req.body.mac);
+    let licence = licences.find(el => el.mac === req.body.mac);
+    licence.Date = new Date().toLocaleDateString();
+    // fs.writeFileSync(`${__dirname}/../data/licences.json`, JSON.stringify(licences));
     if (licence === undefined) {
         res.status(401).json({
             status: "fail",
