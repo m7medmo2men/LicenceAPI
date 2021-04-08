@@ -18,7 +18,7 @@ using System.Security.Cryptography;
 
 class Program
 {
- 
+    
     public static string Encryptt(string encryptString)
     {
         string EncryptionKey = "RE358P71305KMCHA8721DFA684ZXCZNCXD0QMVJD4220L";
@@ -96,8 +96,15 @@ class Program
                 throw response.ErrorException;
             }
             var finalResponse = JObject.Parse(response.Content);
-            return finalResponse["message"].ToString();
-
+            // return finalResponse["message"].ToString();
+            if (finalResponse["status"].ToString() == "success")
+            {
+                return finalResponse["message"].ToString();
+            } 
+            else
+            {
+                return finalResponse["status"].ToString();
+            }
         }
         catch (Exception e)
         {
@@ -105,18 +112,6 @@ class Program
             return "fail";
         }
 
-    }
-
-    public static void UpdateLicence(string xml)
-    {
-        /**
-         * Take a string that represents the xml file
-         * Encrypt it and save it
-         * 
-         * Replace The Old encrypted xml file
-         * */
-        string encryptedNewXml = Encryptt(xml);
-        File.WriteAllText("D:\\work\\licence.xml", encryptedNewXml);
     }
 
     public static void GetDataFromServer() {
@@ -134,41 +129,119 @@ class Program
     public static void ValidateDate(ref XmlDocument xdoc) // This like end of day proc.
     {
         string Date = xdoc.GetElementsByTagName("Date")[0].InnerText;
+        Date = "4/27/2021";
+        string ExpiryDateStr = xdoc.GetElementsByTagName("EndDate")[0].InnerText;
+
         DateTime lastDate = Convert.ToDateTime(Date);
+        DateTime ExpiryDate = Convert.ToDateTime(ExpiryDateStr);
         DateTime ClientDate = DateTime.UtcNow.Date;
+        
+
+        // Move To Server
+        if (lastDate.AddDays(5.0) > ExpiryDate)
+        {
+            string message = $"This Mall Licence will end in {ExpiryDate}";
+            NotifyServer(message);
+        }
         int res = DateTime.Compare(lastDate, ClientDate);
         if (res > 0)
         {
-            // systemDateNow < lastDate
+            // clientDate < lastDate -- Mall Manipulated His System Date
             Console.WriteLine("Date Was Changed ");
-            
+            NotifyServer("Mall XX Changed The Date");
             xdoc.GetElementsByTagName("Active")[0].InnerText = "N";
             xdoc.GetElementsByTagName("Date")[0].InnerText = lastDate.AddDays(1.0).ToShortDateString();
             UpdateLicence(xdoc.InnerXml);
         }
-        else
+        else if (res == 0)
         {
             xdoc.GetElementsByTagName("Date")[0].InnerText = lastDate.AddDays(1.0).ToShortDateString();
             UpdateLicence(xdoc.InnerXml);
+        } 
+        else
+        {
+            // clientDate > lastDate -- Mall Forget To Open Middleware
+            xdoc.GetElementsByTagName("Date")[0].InnerText = ClientDate.ToShortDateString();
+            NotifyServer($"Mall XXX didn't use middelware since {lastDate}");
         }
     }
     
     public static string readLicence()
     {
-        string encryptedXml = File.ReadAllText("D:\\work\\licence.xml");
+        string encryptedXml = File.ReadAllText("D:\\Work\\licence");
         return encryptedXml;
     }
 
-    
+    public static void UpdateLicence(string xml)
+    {
+        /**
+         * Take a string that represents the xml file
+         * Encrypt it and save it
+         * 
+         * Replace The Old encrypted xml file
+         * */
+        string encryptedNewXml = Encryptt(xml);
+        File.WriteAllText("D:\\Work\\licence", encryptedNewXml);
+    }
+
+    public static void DisableLicence()
+    {
+        try
+        {
+            string macAddress = GetMacAddress();
+            var client = new RestClient("http://localhost:3000");
+            var request = new RestRequest("licences/disableLicence", Method.POST);
+            request.AddHeader("Accept", "application/json");
+            request.AddJsonBody(new { mac = macAddress });
+            IRestResponse response = client.Execute(request);
+            if (response.ResponseStatus == ResponseStatus.Error)
+            {
+                throw response.ErrorException;
+            }
+            var finalResponse = JObject.Parse(response.Content);
+            // return finalResponse["message"].ToString();
+            
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+
+    public static void NotifyServer(string msg)
+    {
+        try
+        {
+            string macAddress = GetMacAddress();
+            var client = new RestClient("http://localhost:3000");
+            var request = new RestRequest("licences/notifyExpirationDate", Method.POST);
+            request.AddHeader("Accept", "application/json");
+            request.AddJsonBody(new { mac = macAddress , message = msg});
+            // request.AddJsonBody(new { message = msg });
+            IRestResponse response = client.Execute(request);
+            if (response.ResponseStatus == ResponseStatus.Error)
+            {
+                throw response.ErrorException;
+            }
+            var finalResponse = JObject.Parse(response.Content);
+            // return finalResponse["message"].ToString();
+
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+
     static void Main(string[] args)
     {
-
-        if (!File.Exists("D:\\work\\licence.xml")) {
+        if (!File.Exists("D:\\Work\\licence")) {
             GetDataFromServer();
         }
         
         try
         {
+            // if (File.Exists("D:\\Work\\licence.xml")) ;
             string encryptedXml = readLicence();
             string decryptedXml = Decryptt(encryptedXml);
             XmlDocument xdoc = new XmlDocument();
@@ -184,12 +257,16 @@ class Program
             {
                 Console.WriteLine("Your Licence Runs in Issue ...");
                 Console.WriteLine("Please Contact StarCom ....");
-                GetDataFromServer();
+                
+                // GetDataFromServer();
+                /* Send Request to turn off it's validation */
             }
         } 
         catch (Exception e)
         {
             Console.WriteLine("Licence Was Manipulated ...");
+            NotifyServer("Licence Was Manipulated");
+            /* delete file */
             /* Terminate The Service */
         }
 
