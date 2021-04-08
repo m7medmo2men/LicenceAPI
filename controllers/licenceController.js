@@ -108,3 +108,20 @@ exports.checkLicence = (req, res, next) => {
         })
     }
 }
+
+exports.disableLicence = (req, res, next) => {
+    const licence = licences.find(el => el.mac === req.body.mac);
+    if (licence !== undefined) {
+        for (let i = 0; i < licences.length; i++) {
+            if (licences[i].mac === req.body.mac) {
+                licences[i].Active = "N";
+                fs.writeFileSync(`${__dirname}/../data/licences.json`, JSON.stringify(licences));
+                return res.status(200).json({
+                    status: "success",
+                    message: "licence disables successfully",
+                    data: licences[i]
+                })
+            }
+        }
+    }
+}

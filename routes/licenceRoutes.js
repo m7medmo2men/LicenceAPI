@@ -4,6 +4,9 @@ const licenceController = require("./../controllers/licenceController")
 const router = express.Router();
 
 
+router
+    .route('/disableLicence')
+    .post(licenceController.disableLicence);
 
 router
     .route('/checkLicence')
