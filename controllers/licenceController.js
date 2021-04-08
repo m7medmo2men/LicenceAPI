@@ -100,7 +100,7 @@ exports.deleteLicence = (req, res, next) => {
 exports.checkLicence = (req, res, next) => {
     console.log(req.body.mac)
     let licence = licences.find(el => el.mac === req.body.mac);
-    licence.Date = new Date().toLocaleDateString();
+    
     // fs.writeFileSync(`${__dirname}/../data/licences.json`, JSON.stringify(licences));
     if (licence === undefined) {
         res.status(401).json({
@@ -108,6 +108,10 @@ exports.checkLicence = (req, res, next) => {
             message: "This Machine has no access for portal"
         })
     } else {
+        let date = new Date();
+        date = date.toLocaleDateString();
+        console.log(date);
+        licence.Date = date;
         res.status(200).json({
             status: "success",
             message: licence,
