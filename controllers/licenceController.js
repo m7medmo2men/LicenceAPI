@@ -18,8 +18,6 @@ exports.getAllLicence = (req, res, next) => {
     })
 }
 
-
-
 exports.addNewLicence = (req, res, next) => {
     const nextID = licences.length + 1;
     const newLicence = Object.assign({id: nextID}, req.body);
@@ -108,14 +106,14 @@ exports.checkLicence = (req, res, next) => {
             message: "This Machine has no access for portal"
         })
     } else {
-        let date = new Date();
-        date = date.toLocaleDateString();
-        console.log(date);
-        licence.Date = date;
+        let dateToday = new Date().toISOString();
+        updateLatestProcessingDateOfLicense(req.body.mac, dateToday);
+        console.log(dateToday);
+        license.latestProcessingDate = dateToday;
         res.status(200).json({
-            status: "success",
-            message: licence,
-        })
+        status: "success",
+        message: license,
+        });
     }
 }
 
@@ -136,6 +134,7 @@ exports.disableLicence = (req, res, next) => {
     }
 }
 
+/*
 exports.notifyExpirationDate = (req, res, next) => {
     console.log(req.body);
     const nextID = notifications.length + 1;
@@ -149,4 +148,39 @@ exports.notifyExpirationDate = (req, res, next) => {
         message: "notification added successfully",
         data: newNotification
     })
-}
+} */
+
+exports.createNotification = (req, res, next) => {
+    console.log(req.body);
+    const newNotification = Object.assign(
+      { id: notifications.length + 1 },
+      { date: new Date().toISOString() },
+      { mac: req.body.mac },
+      { mallName: req.body.mallName },
+      { message: req.body.message }
+    );
+  
+    notifications.push(newNotification);
+    fs.writeFileSync(
+      `${__dirname}/../data/notifications.json`,
+      JSON.stringify(notifications)
+    );
+  
+    return res.status(200).json({
+      status: "success",
+      message: "notification added successfully",
+    });
+  };
+
+const updateLatestProcessingDateOfLicense = (mac, latestProcessingDate) => {
+    for (let i = 0; i < licenses.length; i++) {
+      if (licenses[i].mac === mac) {
+        // const updatedLicense = Object.assign({ id: id }, req.body);
+        licenses[i].latestProcessingDate = latestProcessingDate;
+        fs.writeFileSync(
+          `${__dirname}/../data/licenses.json`,
+          JSON.stringify(licenses)
+        );
+      }
+    }
+  };

@@ -4,10 +4,15 @@ const licenceController = require("./../controllers/licenceController")
 const router = express.Router();
 
 
+/*
 router
     .route('/notifyExpirationDate')
     .post(licenceController.notifyExpirationDate)
+*/
 
+router
+    .route("/sendNotification")
+    .post(licenseController.createNotification);
 router
     .route('/disableLicence')
     .post(licenceController.disableLicence);
