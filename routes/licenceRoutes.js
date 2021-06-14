@@ -1,4 +1,3 @@
-const cors = require('cors');
 const express = require("express");
 const licenceController = require("./../controllers/licenceController")
 const router = express.Router();
@@ -12,10 +11,7 @@ router
 
 router
     .route("/sendNotification")
-    .post(licenseController.createNotification);
-router
-    .route('/disableLicence')
-    .post(licenceController.disableLicence);
+    .post(licenceController.createNotification);
 
 router
     .route('/checkLicence')
