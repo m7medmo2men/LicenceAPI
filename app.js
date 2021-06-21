@@ -1,19 +1,37 @@
 const cors = require('cors');
 const https = require('https');
 const path = require('path');
+const dotenv = require('dotenv');
 const fs = require('fs');
+const mongoose = require("mongoose");
 const express = require('express');
-const licenceRouter = require("./routes/licenceRoutes");
+const licenseRouter = require("./routes/licenseRoutes");
+
 const port = 3000;
-
-
 const app = express();
-app.use(express.json());
 
-app.use("/licences", licenceRouter);
+dotenv.config({path: './config.env'});
+
+const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
+
+app.use(express.json());
+ 
+app.use("/licenses", licenseRouter);
 
 app.listen(port, () => { 
     console.log(`App running on port ${port}...`);
+})
+
+
+mongoose.connect(DB, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false
+}).then(() => {
+    console.log("DB Connection Successfully");
+}).catch((err) => {
+    console.log(err)
+    console.log("Failed To Connect To DB connection");
 })
 
 /*
@@ -100,7 +118,7 @@ app.use((req, res, next) => {
 });*/
 
 
-// app.use("/licences", licenceRouter);
+// app.use("/licenses", licenseRouter);
 
 
 

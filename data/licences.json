@@ -5,7 +5,7 @@
     "active": "Y",
     "mac": "F80DAC104198",
     "licenseType": "Trial",
-    "latestProcessingDate": "2021-04-24T21:44:58.037Z",
+    "latestProcessingDate": "2021-04-24T22:26:35.780Z",
     "startDate": "2021-04-01T00:00:00.000Z",
     "endDate": "2022-04-30T00:00:00.000Z",
     "licensedUnits": 320,
@@ -46,5 +46,17 @@
     "endDate": "2021-04-30T00:00:00.000Z",
     "licensedUnits": 25,
     "licensedUsers": 7
+  },
+  {
+    "id": 4,
+    "mallName": "Majjarah",
+    "active": "Y",
+    "mac": "000C29D74D27",
+    "licenseType": "Perpetual",
+    "latestProcessingDate": "2021-06-08T00:00:00.000Z",
+    "startDate": "2021-04-01T00:00:00.000Z",
+    "endDate": "2021-04-30T00:00:00.000Z",
+    "licensedUnits": 20,
+    "licensedUsers": 500
   }
 ]
